@@ -1,0 +1,70 @@
+function ScrollDrag(option) {
+	var _this = this;
+	this.main = document.getElementById(option.main);
+	this.oDiv1 = document.getElementById(option.div1);
+	this.oDiv2 = document.getElementById(option.div2);
+	this.oDiv3 = document.getElementById(option.div3);
+	this.oDiv3.onmousedown = function(ev) {
+		_this.down(ev);
+	}
+	this.tops = 0;
+	if((/firefox/i).test(navigator.userAgent)) {
+		this.main.addEventListener('DOMMouseScroll', function(ev) {
+		 		_this.mouseWheels(option.size,ev);
+        }, false);			
+	} else {
+		this.main.onmousewheel = function(ev) {
+			_this.mouseWheels(option.size,ev);
+		}
+	}
+}
+ScrollDrag.prototype.down = function (ev) {
+	var _this = this;
+	var oEvent = ev || event;
+	tops = oEvent.clientY - this.oDiv3.offsetTop;
+	if(oEvent.button == 2) {
+		console.log('请点击左键')
+	} else {
+		document.onmousemove = function(ev) {
+			_this.move(ev);
+		}
+		document.onmouseup = function() {
+			_this.up();
+		}	
+	}
+	return false;
+}
+ScrollDrag.prototype.move = function (ev) {
+	var oEvent = ev || event;
+	var t = oEvent.clientY - tops;
+	this.comm(t);
+}
+ScrollDrag.prototype.up = function () {
+	document.onmousemove = null;
+	document.onmouseup = null;
+}
+ScrollDrag.prototype.mouseWheels = function (size,ev){
+	var oEvent = ev || event;
+	var dDown = false;
+	dDown = oEvent.wheelDelta? oEvent.wheelDelta < 0 : oEvent.detail >0;
+	var t = this.oDiv3.offsetTop;
+	size = size == undefined ? 10 : size;
+	console.log(size)
+	if(dDown) {
+		t += size;
+	} else {
+		t -= size;
+	}
+	this.comm(t);
+}
+ScrollDrag.prototype.comm = function (t) {
+	var heights = this.main.offsetHeight - this.oDiv3.offsetHeight;
+	if(t < 0) {
+		t = 0;
+	} else if( t > heights) {
+		t = heights;
+	}
+	var a = t / heights;
+	this.oDiv3.style.top = t + 'px';	
+	this.oDiv1.style.top = -a * (this.oDiv1.offsetHeight - this.main.offsetHeight)+ 'px';		
+}
